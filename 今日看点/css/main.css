@@ -1,0 +1,109 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+body{
+	font-family: "宋体"
+}
+.leftDiv{
+	width: 17%;
+	background: #282830;
+	color:white;
+	display: inline-block;
+}
+.topLeft{
+	height: 50px;
+	line-height: 50px;
+	background: #3D556D;
+	font-size: 20px;
+	font-family: "微软雅黑";
+}
+.contentLeft{
+	padding-top:20px;
+}
+.contentLeft li{
+	padding:10px 0;
+	line-height: 30px;
+	font-size:18px;
+	border-bottom:2px solid #333333;
+	cursor: pointer;
+}
+.contentLeft i:first-child{
+	margin-left:20px;
+	margin-right:10px;
+	font-size:20px;
+}
+.contentLeft i:last-child{
+	float:right;
+	margin-right:20px;
+	font-size:20px;
+}
+/*右侧*/
+.rightDiv{
+	width: 83%;
+	float: right;
+}
+.rightDiv .topRight{
+	height: 50px;
+	line-height: 50px;
+	position: relative;	
+}
+/*右侧上部信息*/
+.topRight i{
+	font-size:30px;
+	margin:0 20px;
+}
+.noticeDiv{
+	display: inline-block;
+}
+.topRight .noticeNum{
+	background-color: red;
+	border-radius: 50%;
+	display: inline-block;
+	height: 18px;
+	width: 18px;
+	position: absolute;
+	top:10px;
+	left:115px;
+	line-height: 18px;
+	text-align: center;
+	color: white;
+	font-weight: 900;
+}
+.topRight .infoDiv{
+	float: right;
+	line-height: 50px;
+	height: 50px;
+	margin-right: 30px;
+}
+.infoDiv img{
+	line-height: 50px;
+	margin-top:-10px;
+}
+.infoDiv span{
+	font-size: 18px;
+	margin-top:-10px;
+}
+.infoDiv i{
+	margin:0;
+	font-size:20px;
+}
+.contentRight{
+	background: #F0F0F0;
+	width: 100%;
+	padding:10px;
+	overflow:auto;
+}
+/*首页*/
+/*栏目管理*/
+/*资讯管理*/
+/*用户管理*/
+
+
+
+
+
+
+
+
+

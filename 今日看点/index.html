@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>今日看点</title>
+	<link rel="shortcut icon" href="images/logo.icon">
+	<link rel="stylesheet" href="css/animate.css">
+	<link rel="stylesheet" href="css/bootstrap-3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/bootstrapSwitch/css/bootstrap3/bootstrap-switch.min.css">
+	<link rel="stylesheet" href="css/main.css">
+	<link rel="stylesheet" href="css/iconFont/iconfont.css">
+	<script src="js/jquery-3.3.1.min.js"></script>
+	<script src="js/highcharts.js"></script>
+	<script src="css/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+	<script src="css/bootstrapSwitch/js/bootstrap-switch.min.js"></script>
+	<!-- 引入配置文件 -->
+	<script src="js/config.js"></script>
+	<script src="js/index.js"></script>
+	<script>
+		$(function(){
+			$('.leftDiv').height($(window).height());
+			$('.rightDiv').height($(window).height());
+			$('.contentRight').height($(window).height()-50-20);
+			$('.contentLeft li:first').trigger('click');
+		});
+	</script>
+</head>
+<body>
+	<div class="leftDiv">
+		<div class="topLeft">
+			<img src="images/logo.png" alt="" width="40" height="40" style="margin:0 20px">
+			今日看点
+		</div>
+		<div class="contentLeft">
+			<ul class="list-unstyled">
+				<li><i class="iconfont icon-shouye"></i><span>首页</span><i class="iconfont icon-kuozhan"></i></li>
+				<li><i class="iconfont icon-liebiao"></i><span>栏目管理</span><i class="iconfont icon-kuozhan"></i></li>
+				<li><i class="iconfont icon-zixun"></i><span>资讯管理</span><i class="iconfont icon-kuozhan"></i></li>
+				<li><i class="iconfont icon-ai-user"></i><span>用户管理</span><i class="iconfont icon-kuozhan"></i></li>
+			</ul>
+		</div>
+	</div>
+	<div class="rightDiv">
+		<div class="topRight">
+			<div class="noticeDiv">
+				<i class="iconfont icon-liebiao1"></i>
+				<i class="iconfont icon-laba"></i>
+				<span class="noticeNum">4</span>
+			</div>
+			<div class="infoDiv">
+				<img src="https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1514093920321&di=913e88c23f382933ef430024afd9128a&imgtype=0&src=http%3A%2F%2Fp.3761.com%2Fpic%2F9771429316733.jpg" alt="" style="width: 40px;height: 40px;border-radius: 50%;">
+				<span>乔峰</span>
+				<!-- <i>乔峰</i> -->
+				<i class="iconfont icon-kuozhan"></i>
+			</div>
+		</div>
+		<div class="contentRight">
+			<!-- 这里加载其他的页面 -->
+		</div>
+	</div>
+</body>
+</html>
