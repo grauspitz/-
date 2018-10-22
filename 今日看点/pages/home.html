@@ -10,7 +10,7 @@
 						<i class="iconfont icon-yun"></i>
 					</div>
 					<div class="numDiv">
-						<span>99.9%</span>	
+						<span>99.9%</span>
 						<small>SERVER UPTIME</small>
 					</div>
 				</div>
@@ -20,7 +20,7 @@
 						<i class="iconfont icon-yun"></i>
 					</div>
 					<div class="numDiv">
-						<span>99.9%</span>	
+						<span>99.9%</span>
 						<small>SERVER UPTIME</small>
 					</div>
 				</div>
@@ -30,7 +30,7 @@
 						<i class="iconfont icon-yun"></i>
 					</div>
 					<div class="numDiv">
-						<span>99.9%</span>	
+						<span>99.9%</span>
 						<small>SERVER UPTIME</small>
 					</div>
 				</div>
@@ -40,7 +40,7 @@
 				<div class="visDiv">
 					<div id="visContainer"></div>
 					<div class="numDiv">
-						<span>14.85%</span>	
+						<span>14.85%</span>
 						<small>More Visitors</small>
 					</div>
 				</div>
@@ -49,64 +49,287 @@
 				<div class="uptimeDiv">
 					<div id="uptimeContainer"></div>
 					<div class="numDiv">
-						<span>14.85%</span>	
+						<span>14.85%</span>
 						<small>More Visitors</small>
 					</div>
 				</div>
 				<div class="salesDiv">
 					<div id="salesContainer"></div>
 					<div class="numDiv">
-						<span>14.85%</span>	
+						<span>14.85%</span>
 						<small>More Visitors</small>
 					</div>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-6">
+				<div class="bottom bg-white">
+					<div id="yearnum"></div>
+				</div>
+			</div>
+			<div class="col-sm-6">
+				<div class="bottom bg-white">
+					<div id="thistime"></div>
+
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
 <script>
-	$(function(){
+	$(function () {
 
 		// 画图
 		drawVis();
 		drawUptime();
 		drawSales();
+		drawYear();
+		drawTime();
 		//变量提升  所有的函数和变量的声明都会提前到代码第一行，并且变量提升在函数之前
-/*			var a;
-			function a(){}*/
+		/*			var a;
+					function a(){}*/
 		//	console.log(a);
 		//  var a = 1;
 		//  function a(){}
 		//  console.log(a);
-
-		function drawVis(){
-			var chart = Highcharts.chart('visContainer', {
-				chart:{
-					// 设置图表和区域的距离
-					margin:[0,0,0,0],
+		function drawTime() {
+			function getNow() {
+				var now = new Date();
+				return {
+					hours: now.getHours() + now.getMinutes() / 60,
+					minutes: now.getMinutes() * 12 / 60 + now.getSeconds() * 12 / 3600,
+					seconds: now.getSeconds() * 12 / 60
+				};
+			}
+			/**
+				 * Pad numbers
+				 */
+			function pad(number, length) {
+				// Create an array of the remaining length + 1 and join it with 0's
+				return new Array((length || 2) + 1 - String(number).length).join(0) + number;
+			}
+			var now = getNow();
+			// Create the chart
+			var chart = Highcharts.chart('thistime', {
+				chart: {
+					type: 'gauge',
+					plotBackgroundColor: null,
+					plotBackgroundImage: null,
+					plotBorderWidth: 0,
+					plotShadow: false,
+					height: 400
 				},
-				colors:['#63b919','#cccccc'],
+				credits: {
+					enabled: false
+				},
+				title: {
+					text: 'Highcharts时钟'
+				},
+				pane: {
+					background: [{
+						// default background
+					}, {
+						// reflex for supported browsers
+						backgroundColor: Highcharts.svg ? {
+							radialGradient: {
+								cx: 0.5,
+								cy: -0.4,
+								r: 1.9
+							},
+							stops: [
+								[0.5, 'rgba(255, 255, 255, 0.2)'],
+								[0.5, 'rgba(200, 200, 200, 0.2)']
+							]
+						} : null
+					}]
+				},
+				yAxis: {
+					labels: {
+						distance: -20
+					},
+					min: 0,
+					max: 12,
+					lineWidth: 0,
+					showFirstLabel: false,
+					minorTickInterval: 'auto',
+					minorTickWidth: 1,
+					minorTickLength: 5,
+					minorTickPosition: 'inside',
+					minorGridLineWidth: 0,
+					minorTickColor: '#666',
+					tickInterval: 1,
+					tickWidth: 2,
+					tickPosition: 'inside',
+					tickLength: 10,
+					tickColor: '#666',
+					title: {
+						text: 'Powered by<br/>Highcharts',
+						style: {
+							color: '#BBB',
+							fontWeight: 'normal',
+							fontSize: '8px',
+							lineHeight: '10px'
+						},
+						y: 10
+					}
+				},
+				tooltip: {
+					formatter: function () {
+						return this.series.chart.tooltipText;
+					}
+				},
+				series: [{
+					data: [{
+						id: 'hour',
+						y: now.hours,
+						dial: {
+							radius: '60%',
+							baseWidth: 4,
+							baseLength: '95%',
+							rearLength: 0
+						}
+					}, {
+						id: 'minute',
+						y: now.minutes,
+						dial: {
+							baseLength: '95%',
+							rearLength: 0
+						}
+					}, {
+						id: 'second',
+						y: now.seconds,
+						dial: {
+							radius: '100%',
+							baseWidth: 1,
+							rearLength: '20%'
+						}
+					}],
+					animation: false,
+					dataLabels: {
+						enabled: false
+					}
+				}]
+			}, function (chart) {
+				setInterval(function () {
+					now = getNow();
+					var hour = chart.get('hour'),
+						minute = chart.get('minute'),
+						second = chart.get('second'),
+						// run animation unless we're wrapping around from 59 to 0
+						animation = now.seconds === 0 ?
+							false :
+							{
+								easing: 'easeOutElastic'
+							};
+					// Cache the tooltip text
+					chart.tooltipText =
+						pad(Math.floor(now.hours), 2) + ':' +
+						pad(Math.floor(now.minutes * 5), 2) + ':' +
+						pad(now.seconds * 5, 2);
+					hour.update(now.hours, true, animation);
+					minute.update(now.minutes, true, animation);
+					second.update(now.seconds, true, animation);
+				}, 1000);
+			});
+			// Extend jQuery with some easing (copied from jQuery UI)
+			$.extend($.easing, {
+				easeOutElastic: function (x, t, b, c, d) {
+					var s = 1.70158; var p = 0; var a = c;
+					if (t == 0) return b; if ((t /= d) == 1) return b + c; if (!p) p = d * .3;
+					if (a < Math.abs(c)) { a = c; var s = p / 4; }
+					else var s = p / (2 * Math.PI) * Math.asin(c / a);
+					return a * Math.pow(2, -10 * t) * Math.sin((t * d - s) * (2 * Math.PI) / p) + c + b;
+				}
+			});
+		}
+		function drawYear() {
+			var chart = Highcharts.chart('yearnum', {
+				chart: {
+					type: 'column',
+					options3d: {
+						enabled: true,
+						alpha: 15,
+						beta: 15,
+						viewDistance: 25,
+						depth: 40
+					},
+					marginTop: 80,
+					marginRight: 40
+				},
+				credits: {
+					enabled: false
+				},
+				title: {
+					text: '各个项目年度开销总汇'
+				},
+				xAxis: {
+					categories: ['市场', '后台', '销售', '会计', '开发']
+				},
+				yAxis: {
+					allowDecimals: false,
+					min: 0,
+					title: {
+						text: '各项数量'
+					}
+				},
+				tooltip: {
+					headerFormat: '<b>{point.key}</b><br>',
+					pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: {point.y} / {point.stackTotal}'
+				},
+				plotOptions: {
+					column: {
+						stacking: 'normal',
+						depth: 40
+					}
+				},
+				series: [{
+					name: '第一季度',
+					data: [5, 3, 4, 7, 2],
+					stack: 'male'
+				}, {
+					name: '第二季度',
+					data: [3, 4, 4, 2, 5],
+					stack: 'male'
+				}, {
+					name: '第三季度',
+					data: [2, 5, 6, 2, 1],
+					stack: 'female'
+				}, {
+					name: '第四季度',
+					data: [3, 0, 4, 4, 3],
+					stack: 'female'
+				}]
+			});
+		}
+		function drawVis() {
+			var chart = Highcharts.chart('visContainer', {
+				chart: {
+					// 设置图表和区域的距离
+					margin: [0, 0, 0, 0],
+				},
+				colors: ['#63b919', '#cccccc'],
 				title: {
 					text: ''
 				},
-				credits:{
-					enabled:false
+				credits: {
+					enabled: false
 				},
 				xAxis: {
-					visible:false,
+					visible: false,
 					title: {
 						text: ''
 					}
 				},
 				yAxis: {
-					visible:false,
+					visible: false,
 					title: {
 						text: ''
 					}
 				},
 				legend: {
 					// enabled:false,
-					floating:true,
+					floating: true,
 					layout: 'vertical',
 					align: 'right',
 					verticalAlign: 'top'
@@ -121,33 +344,33 @@
 				},
 				series: [{
 					name: 'PageViews',
-					data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175,43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
+					data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175, 43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
 				}, {
 					name: 'Visitors',
-					data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434,24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
+					data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434, 24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
 				}]
 			});
 		}
-		function drawUptime(){
+		function drawUptime() {
 			// 柱状图
 			Highcharts.chart('uptimeContainer', {
-				colors:['#7c30bc'],
+				colors: ['#7c30bc'],
 				chart: {
 					type: 'column',
-					margin:[0,0,0,0],
+					margin: [0, 0, 0, 0],
 				},
-				credits:{
-					enabled:false
+				credits: {
+					enabled: false
 				},
 				title: {
 					text: ''
 				},
 				xAxis: {
 					type: 'category',
-					visible:false,
+					visible: false,
 				},
 				yAxis: {
-					visible:false,
+					visible: false,
 					title: {
 						text: ''
 					}
@@ -171,21 +394,21 @@
 				series: [{
 					name: 'Uptime',
 					colorByPoint: true,
-					data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4,29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6],
+					data: [29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4, 29.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6],
 				}],
 			});
 		}
-		function drawSales(){
+		function drawSales() {
 			var chart = Highcharts.chart('salesContainer', {
 				// colors:[''],
-				credits:{
-					enabled:false
+				credits: {
+					enabled: false
 				},
 				chart: {
-					margin : [0,0,0,100]
+					margin: [0, 0, 0, 100]
 				},
 				title: {
-					floating:true,
+					floating: true,
 					text: ''
 				},
 				tooltip: {
@@ -209,163 +432,121 @@
 					innerSize: '60%',
 					name: 'sales',
 					data: [
-						['Firefox',45.0],
-						['IE',26.8],
-						['Chrome',12.8],
-						['Safari',8.5],
-						['Opera',6.2],
-						['其他',0.7]
+						['Firefox', 45.0],
+						['IE', 26.8],
+						['Chrome', 12.8],
+						['Safari', 8.5],
+						['Opera', 6.2],
+						['其他', 0.7]
 					]
 				}]
 			});
 		}
 
-		
+
 	});
 </script>
 <style>
-	.outerDiv{
+	.outerDiv {
 		width: 95%;
 		margin: 0 auto;
 	}
-	.bg-white{
+
+	.bg-white {
 		background-color: white;
 	}
-	.bg-green{
+
+	.bg-green {
 		background-color: #63b919;
 	}
+
 	/*左侧的三行*/
-	.totalDiv{
-		overflow:hidden;
+	.totalDiv {
+		overflow: hidden;
 		padding: 10px;
 		border-radius: 5px;
-		margin-top:10px;
+		margin-top: 10px;
 	}
-	.iconDiv,.totalDiv .numDiv{
+
+	.iconDiv,
+	.totalDiv .numDiv {
 		float: left;
 	}
-	.iconDiv{
+
+	.iconDiv {
 		width: 40px;
 		height: 40px;
 		border-radius: 50%;
 		text-align: center;
 		margin-left: 10px;
 	}
-	.iconDiv i{
+
+	.iconDiv i {
 		font-size: 24px;
 		color: white;
 		line-height: 40px;
 	}
-	.totalDiv .numDiv{
+
+	.totalDiv .numDiv {
 		margin-left: 20px;
 	}
-	.numDiv span{
-		font-size:24px; 
+
+	.numDiv span {
+		font-size: 24px;
 		line-height: 24px;
 	}
-	.numDiv small{
+
+	.numDiv small {
 		display: block;
 	}
-	.visDiv,.uptimeDiv,.salesDiv{
+
+	.visDiv,
+	.uptimeDiv,
+	.salesDiv {
 		position: relative;
 	}
-	#visContainer{
+
+	#visContainer {
 		height: 206px;
-		margin-top:10px;
+		margin-top: 10px;
 	}
-	.visDiv .numDiv,.uptimeDiv .numDiv,.salesDiv .numDiv{
+
+	.visDiv .numDiv,
+	.uptimeDiv .numDiv,
+	.salesDiv .numDiv {
 		position: absolute;
-		top:20px;
-		left:20px;
+		top: 20px;
+		left: 20px;
 	}
-	.uptimeDiv .numDiv,.salesDiv .numDiv{
-		top:10px;
+
+	.uptimeDiv .numDiv,
+	.salesDiv .numDiv {
+		top: 10px;
 		left: 10px;
 	}
-	.visDiv .numDiv span{
-		color:#63b919;
+
+	.visDiv .numDiv span {
+		color: #63b919;
 	}
-	#uptimeContainer,#salesContainer{
+
+	#uptimeContainer,
+	#salesContainer {
 		height: 98px;
 		margin-top: 10px;
 	}
-	.uptimeDiv span,.salesDiv span{
-		font-size:20px;
+
+	.uptimeDiv span,
+	.salesDiv span {
+		font-size: 20px;
 	}
-	.uptimeDiv span{
+
+	.uptimeDiv span {
 		color: #7c30bc;
 	}
+
+	.bottom {
+		margin-top: 20px;
+
+		height: 400px;
+	}
 </style>
-<!-- <div id="home">
-	home页面
-	<div class="switch">
-      <input type="checkbox"/>
-    </div>
-    <div id="homeContainer"></div>
-</div>
-<script>
-	$(function(){
-		$('#home input[type=checkbox]').bootstrapSwitch('state',false);
-		$("#home").on({
-			'switchChange.bootstrapSwitch':function (event,state) {
-		          alert(state);
-		          // 点击修改之后，向后台传递参数
-		      }
-		},'[type=checkbox]');
-		// 绘制图表
-		function draw(){
-			var chart = Highcharts.chart('homeContainer', {
-				colors:['red','#00ff00'],
-				title: {
-					text: ''
-				},
-				credits:{
-					enabled:false
-				},
-				xAxis: {
-					visible:false,
-					title: {
-						text: ''
-					}
-				},
-				yAxis: {
-					visible:false,
-					title: {
-						text: ''
-					}
-				},
-				legend: {
-					floating:true,
-					layout: 'vertical',
-					align: 'right',
-					verticalAlign: 'top'
-				},
-				plotOptions: {
-					series: {
-						label: {
-							connectorAllowed: false
-						},
-						pointStart: 2010
-					}
-				},
-				series: [{
-					name: '安装，实施人员',
-					data: [43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175,43934, 52503, 57177, 69658, 97031, 119931, 137133, 154175]
-				}, {
-					name: '工人',
-					data: [24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434,24916, 24064, 29742, 29851, 32490, 30282, 38121, 40434]
-				}]
-			});
-		}
-		draw();
-	});
-</script>
-<style>
-	#home{
-		color: red;
-	}
-	#homeContainer{
-		width: 400px;
-		height: 200px;
-	}
-</style> -->
