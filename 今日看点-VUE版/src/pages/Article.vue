@@ -1,10 +1,14 @@
 <template>
-    <div class="category">
-        <!-- 按钮区 -->
-         
+    <div class="article">
+        <!-- 按钮区 --> 
         <div class="btns">
-            {{category.id}}
-            <el-select v-model="category.id" placeholder="请选择" size="mini">
+            {{categoryId}}
+            <el-select 
+            v-model="params.categoryId" 
+            clearable 
+             style="width:120px"
+            placeholder="请选择" 
+            size="mini">
                     <el-option
                     v-for="item in categories"
                     :key="item.id"
@@ -12,13 +16,24 @@
                     :value="item.id">
                     </el-option>
              </el-select>
+             <el-input 
+             style="width:200px"
+             placeholder="请输入关键字" 
+             size="mini"
+             v-model="params.keywords" 
+             suffix-icon="el-icon-search"
+             clearable>
+
+             </el-input>
             <el-button size='mini' @click="toAddArticle" type="primary" plain>新增</el-button>
             <el-button size='mini' @click="batchDeleteAticle" type="danger" plain>批量删除</el-button>
         </div>
         <!-- 按钮区结束 -->
+
         <!-- 文章管理表格 -->
         <!-- {{articles}} -->
-        <div class="category_tbl" v-loading='loading'>
+        {{params}}
+        <div class="article_tbl" v-loading='loading'>
             <el-table :data="articles" style="width: 100%" 
             size="mini" :border='true' 
              @selection-change="handleSelectionChange">
@@ -77,6 +92,15 @@
             </el-table>
         </div>
         <!-- 栏目管理结束 -->
+        <!-- 分页 -->
+        <div class="page">
+            <el-pagination
+              layout="prev, pager, next"
+              :page-size="params.pageSize"
+              @current-change='handleCurrentChange'
+              :total="total">
+            </el-pagination>
+        </div>
         <!-- 模态框 -->
            <el-dialog :title="cDialog.title" :visible.sync="cDialog.visible">
              <!-- {{cDialog.form}} -->
@@ -118,6 +142,13 @@ export default {
   data() {
     return {
       loading: false,
+      total:10,
+      params: {
+        page: 0,
+        pageSize: 7,
+        categoryId: undefined,
+        keywords: undefined
+      },
       categories: [],
       category: [],
       articles: [],
@@ -130,18 +161,22 @@ export default {
     };
   },
   created() {
-    //查询所有栏目信息
     this.findAllCategories();
     this.findArticles();
   },
   watch: {
-    "category.id": function(now, old) {
-      console.log(now, old);
-      this.category.id = now;
-      this.findArticles();
+    params:{
+      handler:function(){
+        this.findArticles();
+      },
+      deep:true
     }
   },
   methods: {
+    // 处理翻页
+    handleCurrentChange(page){
+      this.params.page = page-1;
+    },
     //修改
     toUpdateArticle(row) {
       this.cDialog.title = "修改文章";
@@ -178,7 +213,7 @@ export default {
       this.cDialog.title = "新增文章";
       this.cDialog.visible = true;
     },
-      //通过id删除
+    //通过id删除
     deleteArticle(id) {
       this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
         confirmButtonText: "确定",
@@ -236,7 +271,6 @@ export default {
 
     //查询所有栏目
     findAllCategories() {
-      this.loading = true;
       axios
         .get("/manager/category/findAllCategory")
         .then(({ data: result }) => {
@@ -247,36 +281,21 @@ export default {
             title: "错误",
             message: "网络异常"
           });
-        })
-        .finally(() => {
-          this.loading = false;
         });
     },
-    //根据栏目id查询文章
+    //查询所有文章
     findArticles() {
       this.loading = true;
-      // var obj = {
-      //     page:0,
-      //     pageSize:100,
-      //     categoryId:this.category.id
-      // }
-      axios({
-        method: "get",
-        url: "/manager/article/findArticle",
-        baseURL: "http://106.14.199.227:8099",
-        params: {
-          page: 0,
-          pageSize: 100,
-          categoryId: this.category.id
-        },
-        paramsSerializer: function(params) {
-          return qs.stringify(params);
-        }
-      })
+      axios
+        .get("/manager/article/findArticle", {
+          params: this.params
+        })
+
         //   axios
         //     .get("/manager/article/findArticle",{page:0, pageSize:100,categoryId:this.category.id})
         .then(({ data: result }) => {
           console.log(result.data.list);
+          this.total = result.data.total;
           this.articles = result.data.list;
         })
         .catch(() => {
@@ -302,5 +321,14 @@ i.fa {
 }
 i.fa.fa-trash {
   color: #f56c6c;
+}
+.article_tbl{
+  position: relative;
+}
+.page{
+  position: relative;
+  left: 250px;
+  width:588px;
+  overflow: auto;
 }
 </style>
