@@ -1,0 +1,306 @@
+<template>
+    <div class="category">
+        <!-- 按钮区 -->
+         
+        <div class="btns">
+            {{category.id}}
+            <el-select v-model="category.id" placeholder="请选择" size="mini">
+                    <el-option
+                    v-for="item in categories"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                    </el-option>
+             </el-select>
+            <el-button size='mini' @click="toAddArticle" type="primary" plain>新增</el-button>
+            <el-button size='mini' @click="batchDeleteAticle" type="danger" plain>批量删除</el-button>
+        </div>
+        <!-- 按钮区结束 -->
+        <!-- 文章管理表格 -->
+        <!-- {{articles}} -->
+        <div class="category_tbl" v-loading='loading'>
+            <el-table :data="articles" style="width: 100%" 
+            size="mini" :border='true' 
+             @selection-change="handleSelectionChange">
+            <el-table-column
+              type="selection"
+              width="55">
+            </el-table-column>
+             <el-table-column
+                prop="id"
+                label="编号"
+                align='center'
+                width="150">
+            </el-table-column>
+            <el-table-column
+                prop="title"
+                label="文章标题"
+                align='center'
+                width="150">
+            </el-table-column>
+            <el-table-column
+                prop="category.name"
+                label="所属栏目"
+                align='center'
+                width="150">
+            </el-table-column>
+            <el-table-column
+                prop="liststyle"
+                align='center'
+                label="排列方式">
+            </el-table-column>
+             <el-table-column
+                prop="author"
+                label="作者"
+                align='center'
+                width="100">
+            </el-table-column>
+              <el-table-column
+                prop="publishtime"
+                label="发布时间"
+                align='center'
+                width="150">
+            </el-table-column>
+              <el-table-column
+                prop="readtimes"
+                label="阅读次数"
+                align='center'
+                width="150">
+            </el-table-column>
+            <el-table-column label="操作" align='center' width='100'>
+                <template slot-scope="{row}">
+                    <!-- {{row}} -->
+                    <i class="fa fa-trash" @click="deleteArticle(row.id)"></i>
+                    <i class="fa fa-pencil" @click="toUpdateArticle(row)"></i>
+                </template>
+            </el-table-column>
+            </el-table>
+        </div>
+        <!-- 栏目管理结束 -->
+        <!-- 模态框 -->
+           <el-dialog :title="cDialog.title" :visible.sync="cDialog.visible">
+             <!-- {{cDialog.form}} -->
+              <el-form :model="cDialog.form" size="mini">
+                <el-form-item label="文章标题" label-width="6em">
+                  <el-input v-model="cDialog.form.title" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="所属栏目" label-width="6em">
+                  <el-select v-model="cDialog.form.category" placeholder=''>
+                    <el-option :key='c.id' v-for='c in categories' :label="c.name" :value="c"></el-option>
+                  </el-select>
+                </el-form-item>
+                 <el-form-item label="列表样式" label-width="6em">
+                   	<label for="style-one">
+                        <input type="radio" value="style-one" id="style-one" v-model="cDialog.form.liststyle">
+                        <img src="../assets/style-one.jpg" alt="" width="160" height="100">
+                    </label>
+                    <label for="style-two">
+                        <input type="radio" value="style-two" id="style-two" v-model="cDialog.form.liststyle">
+                       <img src="../assets/style-two.jpg" alt="" width="160" height="100">
+                    </label>
+                </el-form-item>
+                 <el-form-item label="正文" label-width="6em">
+                  <el-input v-model="cDialog.form.content" type="textarea" :rows="2"></el-input>
+                </el-form-item>
+              </el-form>
+              <div slot="footer" class="dialog-footer">
+                <el-button size="mini" @click="closeCDialog">取 消</el-button>
+                <el-button type="primary" size="mini" @click="saveOrUpdateArticle">确 定</el-button>
+              </div>
+            </el-dialog>
+        <!-- 模态框结束 -->
+    </div>
+</template>
+<script>
+import qs from "qs";
+import axios from "@/http/axios";
+export default {
+  data() {
+    return {
+      loading: false,
+      categories: [],
+      category: [],
+      articles: [],
+      multipleSelection: [],
+      cDialog: {
+        title: "",
+        visible: false,
+        form: {}
+      }
+    };
+  },
+  created() {
+    //查询所有栏目信息
+    this.findAllCategories();
+    this.findArticles();
+  },
+  watch: {
+    "category.id": function(now, old) {
+      console.log(now, old);
+      this.category.id = now;
+      this.findArticles();
+    }
+  },
+  methods: {
+    //修改
+    toUpdateArticle(row) {
+      this.cDialog.title = "修改文章";
+      this.cDialog.form.category = this.category;
+      this.cDialog.form = row;
+      this.cDialog.visible = true;
+    },
+    //提交表单
+    saveOrUpdateArticle() {
+      axios
+        .post("/manager/article/saveOrUpdateArticle", this.cDialog.form)
+        .then(() => {
+          this.$notify.success({
+            title: "成功",
+            message: "提交成功！"
+          });
+          this.closeCDialog();
+          this.findAllCategories();
+        })
+        .catch(() => {
+          this.$notify.error({
+            title: "错误",
+            message: "提交失败！"
+          });
+        });
+    },
+    //关闭模态框
+    closeCDialog() {
+      this.cDialog.form = {};
+      this.cDialog.visible = false;
+    },
+    //弹出模态框
+    toAddArticle() {
+      this.cDialog.title = "新增文章";
+      this.cDialog.visible = true;
+    },
+      //通过id删除
+    deleteArticle(id) {
+      this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        axios
+          .get("/manager/article/deleteArticleById?id=" + id)
+          .then(() => {
+            this.$notify.success({
+              title: "成功",
+              message: "删除成功！"
+            });
+            this.findArticles();
+          })
+          .catch(() => {
+            this.$notify.error({
+              title: "错误",
+              message: "删除失败！"
+            });
+          });
+      });
+    },
+    //批量删除
+    batchDeleteAticle() {
+      this.$confirm("此操作将永久删除该数据, 是否继续?", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+        let ids = this.multipleSelection.map(item => {
+          return item.id;
+        });
+        axios
+          .post("/manager/article/batchDeleteArticle", { ids })
+          .then(() => {
+            this.$notify.success({
+              title: "成功",
+              message: "删除成功！"
+            });
+            this.findArticles();
+          })
+          .catch(() => {
+            this.$notify.error({
+              title: "错误",
+              message: "删除失败！"
+            });
+          });
+      });
+    },
+    //单选框取值
+    handleSelectionChange(val) {
+      this.multipleSelection = val;
+    },
+
+    //查询所有栏目
+    findAllCategories() {
+      this.loading = true;
+      axios
+        .get("/manager/category/findAllCategory")
+        .then(({ data: result }) => {
+          this.categories = result.data;
+        })
+        .catch(() => {
+          this.$notify.error({
+            title: "错误",
+            message: "网络异常"
+          });
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    //根据栏目id查询文章
+    findArticles() {
+      this.loading = true;
+      // var obj = {
+      //     page:0,
+      //     pageSize:100,
+      //     categoryId:this.category.id
+      // }
+      axios({
+        method: "get",
+        url: "/manager/article/findArticle",
+        baseURL: "http://106.14.199.227:8099",
+        params: {
+          page: 0,
+          pageSize: 100,
+          categoryId: this.category.id
+        },
+        paramsSerializer: function(params) {
+          return qs.stringify(params);
+        }
+      })
+        //   axios
+        //     .get("/manager/article/findArticle",{page:0, pageSize:100,categoryId:this.category.id})
+        .then(({ data: result }) => {
+          console.log(result.data.list);
+          this.articles = result.data.list;
+        })
+        .catch(() => {
+          this.$notify.error({
+            title: "错误",
+            message: "网络异常"
+          });
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    }
+  }
+};
+</script>
+<style>
+.btns {
+  margin-bottom: 0.5em;
+}
+i.fa {
+  margin: 0 1em;
+  cursor: pointer;
+}
+i.fa.fa-trash {
+  color: #f56c6c;
+}
+</style>
