@@ -2,7 +2,6 @@
     <div class="article">
         <!-- 按钮区 --> 
         <div class="btns">
-            {{categoryId}}
             <el-select 
             v-model="params.categoryId" 
             clearable 
@@ -32,7 +31,7 @@
 
         <!-- 文章管理表格 -->
         <!-- {{articles}} -->
-        {{params}}
+        <!-- {{params}} -->
         <div class="article_tbl" v-loading='loading'>
             <el-table :data="articles" style="width: 100%" 
             size="mini" :border='true' 
