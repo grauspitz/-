@@ -168,4 +168,7 @@ div {
 .left_nav ul li.current {
   background-color: rgb(92, 182, 120);
 }
+.left_nav ul li:hover {
+  background-color: rgb(92, 182, 120);
+}
 </style>
