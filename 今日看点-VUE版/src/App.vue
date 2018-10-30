@@ -15,17 +15,17 @@
        <div class="left_nav">
          <ul>
             <li :class="{current:currentRoute=='/home'}" class="navtitle">
-              <router-link to="/home"> <div class="dec"><i class="iconfont icon-shouye"></i>&nbsp;首 页</div></router-link>
+              <router-link to="/home"> <div class="dec"><i class="iconfont icon-shouye"></i>&nbsp;首 页&gt;</div></router-link>
            </li>
            <li :class="{current:currentRoute=='/user'}" class="navtitle">
-             <router-link to="/user"> <div class="dec"><i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>&nbsp;用 户</div></router-link>
+             <router-link to="/user"> <div class="dec"><i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>&nbsp;用 户&gt;</div></router-link>
            </li>        
            <li :class="{current:currentRoute=='/category'}" class="navtitle">
-               <router-link to="/category"> <div class="dec"><i class="iconfont icon-lanmu"></i>&nbsp;栏 目</div></router-link>
+               <router-link to="/category"> <div class="dec"><i class="iconfont icon-lanmu"></i>&nbsp;栏 目&gt;</div></router-link>
            </li>
            <li :class="{current:currentRoute=='/article'}" class="navtitle">
          <!-- <router-link to="/article">文章管理</router-link> -->
-              <a href="javascript:void(0)" @click='jump("/article")'> <div class="dec"><i class="iconfont icon-navicon-wzgl"></i>&nbsp;文 章</div></a>
+              <a href="javascript:void(0)" @click='jump("/article")'> <div class="dec"><i class="iconfont icon-navicon-wzgl"></i>&nbsp;文 章&gt;</div></a>
            </li>
       
          </ul>
@@ -152,7 +152,7 @@ div {
   overflow-y: auto;
 }
 .left_nav ul li {
-  line-height: 4em;
+  line-height: 3.5em;
   text-align: center;
 }
 .dec{

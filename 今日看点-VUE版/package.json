@@ -16,6 +16,7 @@
     "qs": "^6.5.2",
     "vue": "^2.5.2",
     "vue-highcharts": "^0.0.10",
+    "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.1"
   },
   "devDependencies": {

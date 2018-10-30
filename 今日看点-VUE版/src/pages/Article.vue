@@ -2,6 +2,15 @@
     <div class="article">
         <!-- 按钮区 --> 
         <div class="btns">
+            <!-- {{categoryId}} -->
+              <el-input 
+             style="width:200px"
+             placeholder="请输入关键字" 
+             size="mini"
+             v-model="params.keywords" 
+             suffix-icon="el-icon-search"
+             clearable>
+             </el-input>
             <el-select 
             v-model="params.categoryId" 
             clearable 
@@ -15,15 +24,7 @@
                     :value="item.id">
                     </el-option>
              </el-select>
-             <el-input 
-             style="width:200px"
-             placeholder="请输入关键字" 
-             size="mini"
-             v-model="params.keywords" 
-             suffix-icon="el-icon-search"
-             clearable>
-
-             </el-input>
+           
             <el-button size='mini' @click="toAddArticle" type="primary" plain>新增</el-button>
             <el-button size='mini' @click="batchDeleteAticle" type="danger" plain>批量删除</el-button>
         </div>
@@ -31,7 +32,7 @@
 
         <!-- 文章管理表格 -->
         <!-- {{articles}} -->
-        <!-- {{params}} -->
+        {{params}}
         <div class="article_tbl" v-loading='loading'>
             <el-table :data="articles" style="width: 100%" 
             size="mini" :border='true' 
@@ -101,33 +102,48 @@
             </el-pagination>
         </div>
         <!-- 模态框 -->
-           <el-dialog :title="cDialog.title" :visible.sync="cDialog.visible">
-             <!-- {{cDialog.form}} -->
-              <el-form :model="cDialog.form" size="mini">
-                <el-form-item label="文章标题" label-width="6em">
-                  <el-input v-model="cDialog.form.title" autocomplete="off"></el-input>
+           <el-dialog fullscreen :title="articleDialog.title" :visible.sync="articleDialog.visible">
+             {{articleDialog.form}}
+              <el-form :model="articleDialog.form" size="mini">
+                <el-form-item label="资讯标题" label-width="6em">
+                  <el-input v-model="articleDialog.form.title" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="所属栏目" label-width="6em">
-                  <el-select v-model="cDialog.form.category" placeholder=''>
-                    <el-option :key='c.id' v-for='c in categories' :label="c.name" :value="c"></el-option>
+                  <el-select v-model="articleDialog.form.categoryId" placeholder=''>
+                    <el-option :key='c.id' v-for='c in categories' :label="c.name" :value="c.id"></el-option>
                   </el-select>
                 </el-form-item>
                  <el-form-item label="列表样式" label-width="6em">
-                   	<label for="style-one">
-                        <input type="radio" value="style-one" id="style-one" v-model="cDialog.form.liststyle">
-                        <img src="../assets/style-one.jpg" alt="" width="160" height="100">
-                    </label>
-                    <label for="style-two">
-                        <input type="radio" value="style-two" id="style-two" v-model="cDialog.form.liststyle">
-                       <img src="../assets/style-two.jpg" alt="" width="160" height="100">
-                    </label>
+                   <ul class="list_style">
+                     <li class="style_one" :class="{current:articleDialog.form.liststyle=='style-one'}" @click="articleDialog.form.liststyle = 'style-one'">
+                       <img src="@/assets/style_one.jpg" alt="">
+                     </li>
+                     <li class="style_two" :class="{current:articleDialog.form.liststyle=='style-two'}" @click="articleDialog.form.liststyle = 'style-two'">
+                       <img src="@/assets/style_two.jpg" alt="">
+                     </li>
+                   </ul>
                 </el-form-item>
+                   <el-form-item label="缩略图" label-width="6em">
+                        <el-upload
+                          action="http://120.78.164.247:8099/manager/file/upload"
+                          :on-success='handleUploadSuccess'
+                          list-type="picture">
+                          <el-button size="small" type="primary">点击上传</el-button>
+                          <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                        </el-upload>     
+                  </el-form-item>
                  <el-form-item label="正文" label-width="6em">
-                  <el-input v-model="cDialog.form.content" type="textarea" :rows="2"></el-input>
+                  <quill-editor 
+                      v-model="articleDialog.form.content" 
+                      ref="myQuillEditor" 
+                      :options="editorOption" 
+                      @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"
+                      @change="onEditorChange($event)"> 
+                  </quill-editor>
                 </el-form-item>
               </el-form>
               <div slot="footer" class="dialog-footer">
-                <el-button size="mini" @click="closeCDialog">取 消</el-button>
+                <el-button size="mini" @click="closeArticleDialog">取 消</el-button>
                 <el-button type="primary" size="mini" @click="saveOrUpdateArticle">确 定</el-button>
               </div>
             </el-dialog>
@@ -135,13 +151,15 @@
     </div>
 </template>
 <script>
+import { quillEditor } from "vue-quill-editor";
 import qs from "qs";
 import axios from "@/http/axios";
 export default {
   data() {
     return {
+      editorOption: {},
       loading: false,
-      total:10,
+      total: 10,
       params: {
         page: 0,
         pageSize: 7,
@@ -152,10 +170,13 @@ export default {
       category: [],
       articles: [],
       multipleSelection: [],
-      cDialog: {
+      articleDialog: {
         title: "",
         visible: false,
-        form: {}
+        form: {
+          liststyle: "style-one",
+          fileIds: []
+        }
       }
     };
   },
@@ -163,37 +184,64 @@ export default {
     this.findAllCategories();
     this.findArticles();
   },
+  computed: {
+    keywords() {
+      return this.params.keywords;
+    },
+    categoryId() {
+      return this.params.categoryId;
+    }
+  },
   watch: {
-    params:{
-      handler:function(){
+    params: {
+      handler: function() {
         this.findArticles();
       },
-      deep:true
+      deep: true
+    },
+    keywords() {
+      this.params.page = 0;
+    },
+    categoryId() {
+      this.params.page = 0;
     }
   },
   methods: {
+    onEditorBlur() {
+      //失去焦点事件
+    },
+    onEditorFocus() {
+      //获得焦点事件
+    },
+    onEditorChange() {
+      //内容改变事件
+    },
+    //上传图片
+    handleUploadSuccess(response, file, fileList) {
+     this.articleDialog.form.fileIds.push(response.data.id);
+    },
     // 处理翻页
-    handleCurrentChange(page){
-      this.params.page = page-1;
+    handleCurrentChange(page) {
+      this.params.page = page - 1;
     },
     //修改
     toUpdateArticle(row) {
-      this.cDialog.title = "修改文章";
-      this.cDialog.form.category = this.category;
-      this.cDialog.form = row;
-      this.cDialog.visible = true;
+      this.articleDialog.title = "修改文章";
+      this.articleDialog.form.category = this.category;
+      this.articleDialog.form = row;
+      this.articleDialog.visible = true;
     },
     //提交表单
     saveOrUpdateArticle() {
       axios
-        .post("/manager/article/saveOrUpdateArticle", this.cDialog.form)
+        .post("/manager/article/saveOrUpdateArticle", this.articleDialog.form)
         .then(() => {
           this.$notify.success({
             title: "成功",
             message: "提交成功！"
           });
-          this.closeCDialog();
-          this.findAllCategories();
+          this.closeArticleDialog();
+          this.findArticles();
         })
         .catch(() => {
           this.$notify.error({
@@ -203,14 +251,14 @@ export default {
         });
     },
     //关闭模态框
-    closeCDialog() {
-      this.cDialog.form = {};
-      this.cDialog.visible = false;
+    closeArticleDialog() {
+      this.articleDialog.form = {};
+      this.articleDialog.visible = false;
     },
     //弹出模态框
     toAddArticle() {
-      this.cDialog.title = "新增文章";
-      this.cDialog.visible = true;
+      this.articleDialog.title = "发布文章";
+      this.articleDialog.visible = true;
     },
     //通过id删除
     deleteArticle(id) {
@@ -311,6 +359,7 @@ export default {
 };
 </script>
 <style>
+
 .btns {
   margin-bottom: 0.5em;
 }
@@ -321,13 +370,35 @@ i.fa {
 i.fa.fa-trash {
   color: #f56c6c;
 }
-.article_tbl{
+.article_tbl {
   position: relative;
 }
-.page{
+.page {
   position: relative;
   left: 250px;
-  width:588px;
+  width: 588px;
   overflow: auto;
+}
+
+.list_style>li.current{
+  border:2px solid #8dbef3;
+}
+.list_style > li {
+  width: 200px;
+  height: 80px;
+  border: 1px solid #ededed;
+  border-radius: 3px;
+  padding: .5em;
+}
+.list_style > li img {
+  width: 100%;
+}
+.list_style > li.style_one{
+  padding: 0;
+  float: left;
+}
+.list_style > li.style_two{
+  padding: 0;
+  margin-left: 220px;
 }
 </style>
