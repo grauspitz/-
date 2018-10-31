@@ -2,11 +2,11 @@
     <div class="user">
         <!-- 按钮区 -->
         <div class="btns">
-            <el-button size='mini' @click="toAddUser" type="primary" plain>新增</el-button>
+            <el-button size='medium' @click="toAddUser" type="primary">新增</el-button>
         </div>
         <!-- 按钮区结束 -->
-        <!-- 栏目管理表格 -->
-        <div  v-loading='loading'>
+        <!-- 用户管理表格 -->
+        <!-- <div  v-loading='loading'>
             <el-table :data="users" style="width: 100%" height="400" 
             class="user_tbl"
             size="mini" :border='true' >
@@ -42,12 +42,36 @@
             <el-table-column label="操作" align='center' width='100'>
                 <template slot-scope="{row}">
                     <i class="fa fa-trash" @click="deleteUser(row.id)"></i>
-                    <!-- <i class="fa fa-pencil" @click="toUpdateUser(row)"></i> -->
                 </template>
             </el-table-column>
             </el-table>
-        </div>
-        <!-- 栏目管理结束 -->
+        </div> -->
+        <!-- 用户管理结束 -->
+        <!-- 卡片 -->
+             <el-row v-loading='loading'>
+                 <el-col :span="4" v-for="(u,index) in users" :key="index" :offset="1" style="margin-bottom:40px">
+                    <el-card :body-style="{ padding: '0px', height:'360px'}" shadow="hover" style="width: 260px;height: 320px;">
+                        <div style="padding: 6px;height: 310px;">
+                            <div style="position: relative;top: 40px; width:100%">
+                                <img src="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3100338932,2256022770&fm=27&gp=0.jpg" class="image">
+                                <div  style="margin:0 auto;width:140px;"><i class="iconfont icon-tubiaozhizuomobanyihuifu-"></i>{{u.nickname}}</div>
+                            </div>
+                            <div style="position: relative;top: 50px;">
+                                <div style="margin:0 auto;width:140px;">{{'('+u.username+')'}}</div>
+                            </div>
+                           <div style="position: relative;top: 60px;">
+                                <div  style="margin:0 auto;width:100%;"><i class="fa fa-envelope"></i>{{u.email}}</div>
+                            </div>
+                              <div style="position: relative;top: 80px; text-align:inline-block;">
+                                 <div style="margin:0 auto;width:90px;"><el-button style="margin:0 auto" type="danger" icon="el-icon-delete" circle @click="deleteUser(u.id)"></el-button></div>
+                            </div>
+                         
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
+
+        <!-- 卡片 -->
         <!-- 模态框 -->
            <el-dialog :title="cDialog.title" :visible.sync="cDialog.visible">
              <!-- {{cDialog.form}} -->
@@ -95,13 +119,6 @@ export default {
     this.findAllUser();
   },
   methods: {
-    //修改
-    // toUpdateUser(row){
-    //   this.cDialog.title = '修改用户';
-    //   this.cDialog.form = row;
-    //   this.cDialog.form.regTime = '';
-    //   this.cDialog.visible = true;
-    // },
     //提交表单
     saveOrUpdateUser() {
       axios
@@ -177,11 +194,12 @@ export default {
 };
 </script>
 <style>
-.user_tbl{
-    margin: 0 auto;
+.user_tbl {
+  margin: 0 auto;
 }
 .btns {
   margin-bottom: 0.5em;
+  margin-left:3em;
 }
 i.fa {
   margin: 0 1em;
@@ -189,5 +207,20 @@ i.fa {
 }
 i.fa.fa-trash {
   color: #f56c6c;
+}
+.userUL {
+  width: 100%;
+  display: inline-block;
+}
+.box {
+  width: 30%;
+  height: 400px;
+  background-color: antiquewhite;
+}
+.image {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  left: 50px;
 }
 </style>

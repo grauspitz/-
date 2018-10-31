@@ -103,7 +103,7 @@
         </div>
         <!-- 模态框 -->
            <el-dialog fullscreen :title="articleDialog.title" :visible.sync="articleDialog.visible">
-             {{articleDialog.form}}
+             <!-- {{articleDialog.form}} -->
               <el-form :model="articleDialog.form" size="mini">
                 <el-form-item label="资讯标题" label-width="6em">
                   <el-input v-model="articleDialog.form.title" autocomplete="off"></el-input>
@@ -132,14 +132,10 @@
                           <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                         </el-upload>     
                   </el-form-item>
-                 <el-form-item label="正文" label-width="6em">
-                  <quill-editor 
-                      v-model="articleDialog.form.content" 
-                      ref="myQuillEditor" 
-                      :options="editorOption" 
-                      @blur="onEditorBlur($event)" @focus="onEditorFocus($event)"
-                      @change="onEditorChange($event)"> 
-                  </quill-editor>
+                 <el-form-item label="正文" label-width="120px">
+                  <div id="main">
+                      <mavon-editor ref=md v-model="articleDialog.form.content"/>
+                  </div>
                 </el-form-item>
               </el-form>
               <div slot="footer" class="dialog-footer">
@@ -185,12 +181,12 @@ export default {
     this.findArticles();
   },
   computed: {
-    keywords() {
-      return this.params.keywords;
-    },
-    categoryId() {
-      return this.params.categoryId;
-    }
+    // keywords() {
+    //   return this.params.keywords;
+    // },
+    // categoryId() {
+    //   return this.params.categoryId;
+    // }
   },
   watch: {
     params: {
@@ -199,26 +195,18 @@ export default {
       },
       deep: true
     },
-    keywords() {
+    "params.keywords"() {
       this.params.page = 0;
     },
-    categoryId() {
+    "params.categoryId"() {
       this.params.page = 0;
     }
   },
   methods: {
-    onEditorBlur() {
-      //失去焦点事件
-    },
-    onEditorFocus() {
-      //获得焦点事件
-    },
-    onEditorChange() {
-      //内容改变事件
-    },
+   
     //上传图片
     handleUploadSuccess(response, file, fileList) {
-     this.articleDialog.form.fileIds.push(response.data.id);
+      this.articleDialog.form.fileIds.push(response.data.id);
     },
     // 处理翻页
     handleCurrentChange(page) {
@@ -229,16 +217,14 @@ export default {
       let article = _.clone(row);
       article.categoryId = article.category.id;
       delete article.category;
-      article.fileIds = article.articleFileVMs.map(item=>item.cmsFile.id)
+      article.fileIds = article.articleFileVMs.map(item => item.cmsFile.id);
       delete article.articleFileVMs;
-      for(let key in article){
+      for (let key in article) {
         let val = article[key];
-        if(!val){
+        if (!val) {
           delete article[key];
         }
       }
-
-
 
       this.articleDialog.form = article;
       this.articleDialog.title = "修改文章";
@@ -246,6 +232,7 @@ export default {
     },
     //提交表单
     saveOrUpdateArticle() {
+      this.articleDialog.form.source = this.$refs.md.d_render;
       axios
         .post("/manager/article/saveOrUpdateArticle", this.articleDialog.form)
         .then(() => {
@@ -266,6 +253,7 @@ export default {
     //关闭模态框
     closeArticleDialog() {
       this.articleDialog.form = {};
+      this.articleDialog.form = { liststyle: "style-one" };
       this.articleDialog.visible = false;
     },
     //弹出模态框
@@ -372,7 +360,6 @@ export default {
 };
 </script>
 <style>
-
 .btns {
   margin-bottom: 0.5em;
 }
@@ -393,24 +380,24 @@ i.fa.fa-trash {
   overflow: auto;
 }
 
-.list_style>li.current{
-  border:2px solid #8dbef3;
+.list_style > li.current {
+  border: 2px solid #8dbef3;
 }
 .list_style > li {
   width: 200px;
   height: 80px;
   border: 1px solid #ededed;
   border-radius: 3px;
-  padding: .5em;
+  padding: 0.5em;
 }
 .list_style > li img {
   width: 100%;
 }
-.list_style > li.style_one{
+.list_style > li.style_one {
   padding: 0;
   float: left;
 }
-.list_style > li.style_two{
+.list_style > li.style_two {
   padding: 0;
   margin-left: 220px;
 }

@@ -55,7 +55,7 @@
                   <el-input v-model="cDialog.form.name" autocomplete="off"></el-input>
                 </el-form-item>
                 <el-form-item label="父栏目" label-width="6em">
-                  <el-select v-model="cDialog.form.parentId" placeholder="一级栏目">
+                  <el-select v-model="cDialog.form.parentId" placeholder="一级栏目" clearable>
                     <el-option :key='c.id' v-for='c in categories' :label="c.name" :value="c.id"></el-option>
                   </el-select>
                 </el-form-item>
