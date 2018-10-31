@@ -125,7 +125,7 @@
                 </el-form-item>
                    <el-form-item label="缩略图" label-width="6em">
                         <el-upload
-                          action="http://120.78.164.247:8099/manager/file/upload"
+                          action="http://106.14.199.227:8099/manager/file/upload"
                           :on-success='handleUploadSuccess'
                           list-type="picture">
                           <el-button size="small" type="primary">点击上传</el-button>
