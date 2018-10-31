@@ -32,7 +32,7 @@
 
         <!-- 文章管理表格 -->
         <!-- {{articles}} -->
-        {{params}}
+        <!-- {{params}} -->
         <div class="article_tbl" v-loading='loading'>
             <el-table :data="articles" style="width: 100%" 
             size="mini" :border='true' 
@@ -226,9 +226,22 @@ export default {
     },
     //修改
     toUpdateArticle(row) {
+      let article = _.clone(row);
+      article.categoryId = article.category.id;
+      delete article.category;
+      article.fileIds = article.articleFileVMs.map(item=>item.cmsFile.id)
+      delete article.articleFileVMs;
+      for(let key in article){
+        let val = article[key];
+        if(!val){
+          delete article[key];
+        }
+      }
+
+
+
+      this.articleDialog.form = article;
       this.articleDialog.title = "修改文章";
-      this.articleDialog.form.category = this.category;
-      this.articleDialog.form = row;
       this.articleDialog.visible = true;
     },
     //提交表单
