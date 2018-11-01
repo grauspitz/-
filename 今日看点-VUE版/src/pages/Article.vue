@@ -103,39 +103,45 @@
         </div>
         <!-- 模态框 -->
            <el-dialog fullscreen :title="articleDialog.title" :visible.sync="articleDialog.visible">
-             <!-- {{articleDialog.form}} -->
+             {{articleDialog.form}}
               <el-form :model="articleDialog.form" size="mini">
                 <el-form-item label="资讯标题" label-width="6em">
                   <el-input v-model="articleDialog.form.title" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="所属栏目" label-width="6em">
-                  <el-select v-model="articleDialog.form.categoryId" placeholder=''>
-                    <el-option :key='c.id' v-for='c in categories' :label="c.name" :value="c.id"></el-option>
-                  </el-select>
+                <el-row>
+                  <el-col :span='12'>
+                      <el-form-item label="列表样式" label-width="6em">
+                         <ul class="list_style">
+                           <li class="style_one" :class="{current:articleDialog.form.liststyle=='style-one'}" @click="articleDialog.form.liststyle = 'style-one'">
+                            <img src="@/assets/style_one.jpg" alt="">
+                           </li>
+                            <li class="style_two" :class="{current:articleDialog.form.liststyle=='style-two'}" @click="articleDialog.form.liststyle = 'style-two'">
+                              <img src="@/assets/style_two.jpg" alt="">
+                            </li>
+                         </ul>
+                      </el-form-item>
+                  </el-col>
+                  <el-col :span='12'>
+                     <el-form-item label="所属栏目" label-width="6em">
+                        <el-select style="width:100%" v-model="articleDialog.form.categoryId" placeholder='' >
+                        <el-option :key='c.id' v-for='c in categories' :label="c.name" :value="c.id"></el-option>
+                       </el-select>
                 </el-form-item>
-                 <el-form-item label="列表样式" label-width="6em">
-                   <ul class="list_style">
-                     <li class="style_one" :class="{current:articleDialog.form.liststyle=='style-one'}" @click="articleDialog.form.liststyle = 'style-one'">
-                       <img src="@/assets/style_one.jpg" alt="">
-                     </li>
-                     <li class="style_two" :class="{current:articleDialog.form.liststyle=='style-two'}" @click="articleDialog.form.liststyle = 'style-two'">
-                       <img src="@/assets/style_two.jpg" alt="">
-                     </li>
-                   </ul>
-                </el-form-item>
+                  </el-col>
+                </el-row>                
                    <el-form-item label="缩略图" label-width="6em">
                         <el-upload
                           action="http://106.14.199.227:8099/manager/file/upload"
                           :on-success='handleUploadSuccess'
+                          :file-list="fileList"
+                          :on-remove="handleFileRemove"
                           list-type="picture">
                           <el-button size="small" type="primary">点击上传</el-button>
                           <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
                         </el-upload>     
                   </el-form-item>
-                 <el-form-item label="正文" label-width="120px">
-                  <div id="main">
-                      <mavon-editor ref=md v-model="articleDialog.form.content"/>
-                  </div>
+                 <el-form-item label="文章正文" label-width="6em">
+                      <mavon-editor ref="articleContent" v-model="articleDialog.form.content"/>
                 </el-form-item>
               </el-form>
               <div slot="footer" class="dialog-footer">
@@ -153,6 +159,7 @@ import axios from "@/http/axios";
 export default {
   data() {
     return {
+      fileList: [],
       editorOption: {},
       loading: false,
       total: 10,
@@ -203,9 +210,32 @@ export default {
     }
   },
   methods: {
-   
+    handleFileRemove(file) {
+      axios
+        .get("/manager/file/delete", {
+          params: { id: file.name }
+        })
+        .then(() => {
+          this.$notify.success({
+            title: "成功",
+            message: "删除成功！"
+          });
+          _.remove(this.articleDialog.form.fileIds,(id)=>{
+            return id == file.name
+          })
+          this.articleDialog.form.fileIds.push(1);
+          this.articleDialog.form.fileIds.pop();
+        })
+        .catch(() => {
+          this.$notify.error({
+            title: "错误",
+            message: "删除失败！"
+          });
+        });
+    },
     //上传图片
     handleUploadSuccess(response, file, fileList) {
+      file.name = response.data.id;
       this.articleDialog.form.fileIds.push(response.data.id);
     },
     // 处理翻页
@@ -217,8 +247,17 @@ export default {
       let article = _.clone(row);
       article.categoryId = article.category.id;
       delete article.category;
+      //处理附件默认显示
+      this.fileList = article.articleFileVMs.map(item => {
+        return {
+          name: item.cmsFile.id,
+          url: "http://39.108.81.60:8888/group1/" + item.cmsFile.id
+        };
+      });
+
       article.fileIds = article.articleFileVMs.map(item => item.cmsFile.id);
       delete article.articleFileVMs;
+      //删除空值
       for (let key in article) {
         let val = article[key];
         if (!val) {
@@ -232,7 +271,7 @@ export default {
     },
     //提交表单
     saveOrUpdateArticle() {
-      this.articleDialog.form.source = this.$refs.md.d_render;
+      this.articleDialog.form.source = this.$refs.articleContent.d_render;
       axios
         .post("/manager/article/saveOrUpdateArticle", this.articleDialog.form)
         .then(() => {
@@ -259,6 +298,12 @@ export default {
     //弹出模态框
     toAddArticle() {
       this.articleDialog.title = "发布文章";
+      this.articleDialog.form = {
+        liststyle: "style-one",
+        fileIds: []
+      };
+      //重置附件
+      this.fileList = [];
       this.articleDialog.visible = true;
     },
     //通过id删除

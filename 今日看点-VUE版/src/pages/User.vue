@@ -93,6 +93,7 @@
                 </el-form-item>
               </el-form>
               <div slot="footer" class="dialog-footer">
+                <label for="" style="color:red">{{msg}}</label>
                 <el-button size="mini" @click="closeCDialog">取 消</el-button>
                 <el-button type="primary" size="mini" @click="saveOrUpdateUser">确 定</el-button>
               </div>
@@ -105,6 +106,7 @@ import axios from "@/http/axios";
 export default {
   data() {
     return {
+      msg:'',
       loading: false,
       users: [],
       cDialog: {
@@ -121,22 +123,31 @@ export default {
   methods: {
     //提交表单
     saveOrUpdateUser() {
-      axios
-        .post("/manager/user/saveOrUpdateUser", this.cDialog.form)
-        .then(() => {
-          this.$notify.success({
-            title: "成功",
-            message: "提交成功！"
-          });
-          this.closeCDialog();
-          this.findAllUser();
-        })
-        .catch(() => {
-          this.$notify.error({
-            title: "错误",
-            message: "提交失败！"
-          });
+      if(this.cDialog.form.username && this.cDialog.form.nickname && this.cDialog.form.password && this.cDialog.form.password1 && this.cDialog.form.email){
+        if( this.cDialog.form.password ==this.cDialog.form.password1){
+              axios
+            .post("/manager/user/saveOrUpdateUser", this.cDialog.form)
+            .then(() => {
+              this.$notify.success({
+                title: "成功",
+                message: "提交成功！"
+              });
+              this.closeCDialog();
+              this.findAllUser();
+            })
+            .catch(() => {
+              this.$notify.error({
+                title: "错误",
+                message: "提交失败！"
+              });
         });
+        } else{
+            this.msg= '密码不一致'
+          }
+      }else{
+        this.msg = '请输入完整信息'
+      }
+     
     },
     //关闭模态框
     closeCDialog() {
@@ -145,6 +156,7 @@ export default {
     },
     //弹出模态框
     toAddUser() {
+      this.msg = ''
       this.cDialog.title = "添加用户";
       this.cDialog.visible = true;
     },
@@ -172,7 +184,7 @@ export default {
           });
       });
     },
-    //查询所有栏目
+    //查询所有用户
     findAllUser() {
       this.loading = true;
       axios

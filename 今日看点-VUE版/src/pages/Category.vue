@@ -94,7 +94,9 @@ export default {
     //修改
     toUpdateCategory(row){
       this.cDialog.title = '修改栏目';
+      if(row.parent){
       row.parentId = row.parent.id;
+      }
       this.cDialog.form = row;
       this.cDialog.visible = true;
     },

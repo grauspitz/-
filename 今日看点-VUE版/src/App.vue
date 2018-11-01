@@ -86,6 +86,9 @@ a {
 div {
   box-sizing: border-box;
 }
+.el-dialog__body{
+  padding: 0 20px;
+}
 div {
   box-sizing: border-box;
 }
