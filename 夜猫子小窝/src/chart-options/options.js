@@ -7,7 +7,7 @@ module.exports = {
       enabled: false
     },
     title: {
-      text: "今日看点每周热度报表" //指定图表标题
+      text: "夜猫子每周热度报表" //指定图表标题
     },
     colors: ["#058DC7", "#50B432", "#ED561B", "#DDDF00", "#2F3440", "#24CBE5", "orange"],
 
